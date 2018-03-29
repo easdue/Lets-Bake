@@ -2,6 +2,7 @@ package nl.erikduisters.letsbake.ui.fragment.recipe_detail;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
@@ -26,10 +27,12 @@ import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentVi
 
 public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewModel> implements RecipeAdapter.OnStepClickedListener {
     private final static String KEY_RECIPE_ID = "RecipeId";
+    private final static String KEY_LAYOUTMANAGER_STATE = "LayoutManagerState";
 
     private RecipeAdapter recipeAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private Context context;
+    private Parcelable layoutManagerState;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
@@ -62,9 +65,18 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         recipeAdapter = new RecipeAdapter();
         recipeAdapter.setOnStepClickedListener(this);
 
-        viewModel.getRecipeDetaiLViewState().observe(this, this::render);
+        viewModel.getRecipeDetailViewState().observe(this, this::render);
         viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
-        //TODO: RestoreRecyclerViewState if any
+
+        viewModel.getStartActivityViewState().observe(this, this::render);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAYOUTMANAGER_STATE)) {
+            RecipeDetailFragmentViewState.RecipeDetailViewState state = viewModel.getRecipeDetailViewState().getValue();
+
+            if (state == null || state.status == Status.LOADING) {
+                layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUTMANAGER_STATE);
+            }
+        }
     }
 
     @Nullable
@@ -85,6 +97,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        outState.putParcelable(KEY_LAYOUTMANAGER_STATE, layoutManager.onSaveInstanceState());
     }
 
     @Override
@@ -115,6 +128,11 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
                 textView.setVisibility(View.INVISIBLE);
 
                 recipeAdapter.setRecipe(viewState.recipe);
+
+                if (layoutManagerState != null) {
+                    layoutManager.onRestoreInstanceState(layoutManagerState);
+                    layoutManagerState = null;
+                }
                 break;
             case Status.ERROR:
                 progressBar.setVisibility(View.GONE);
@@ -127,6 +145,16 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
                 textView.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    private void render(@Nullable RecipeDetailFragmentViewState.StartActivityViewState viewState) {
+        if (viewState == null) {
+            return;
+        }
+
+        startActivity(viewState.getIntent(getContext()));
+
+        viewModel.onActivityStarted();
     }
 
     @Override

@@ -155,6 +155,8 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeDeta
 
         @Override
         public void bind(Recipe recipe, int position) {
+            Timber.e("bind, position = %d", position);
+
             Step step = recipe.getSteps().get(position);
 
             shortDescription.setText(step.getShortDescription());

@@ -51,8 +51,8 @@ public interface RecipeListFragmentViewState {
     }
 
     final class StartActivityViewState implements RecipeListFragmentViewState {
-        final int recipeId;
-        final Class<? extends BaseActivity> activityClass;
+        private final int recipeId;
+        private final Class<? extends BaseActivity> activityClass;
 
         StartActivityViewState(int recipeId, Class<? extends BaseActivity> activityClass) {
             this.recipeId = recipeId;

@@ -12,7 +12,9 @@ import nl.erikduisters.letsbake.R;
 import nl.erikduisters.letsbake.data.local.RecipeRepository;
 import nl.erikduisters.letsbake.data.model.Recipe;
 import nl.erikduisters.letsbake.data.model.Step;
+import nl.erikduisters.letsbake.ui.activity.recipe_step_detail.RecipeStepDetailActivity;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentViewState.RecipeDetailViewState;
+import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentViewState.StartActivityViewState;
 import timber.log.Timber;
 
 /**
@@ -24,6 +26,7 @@ public class RecipeDetailFragmentViewModel extends ViewModel {
     private final RecipeRepository recipeRepository;
 
     private final MutableLiveData<RecipeDetailViewState> recipeDetailViewState;
+    private final MutableLiveData<StartActivityViewState> startActivityViewState;
 
     @Inject
     RecipeDetailFragmentViewModel(RecipeRepository recipeRepository) {
@@ -33,9 +36,12 @@ public class RecipeDetailFragmentViewModel extends ViewModel {
 
         recipeDetailViewState = new MutableLiveData<>();
         recipeDetailViewState.setValue(RecipeDetailViewState.getLoadingState());
+
+        startActivityViewState = new MutableLiveData<>();
     }
 
-    LiveData<RecipeDetailViewState> getRecipeDetaiLViewState() { return recipeDetailViewState; }
+    LiveData<RecipeDetailViewState> getRecipeDetailViewState() { return recipeDetailViewState; }
+    LiveData<StartActivityViewState> getStartActivityViewState() { return startActivityViewState; }
 
     void setRecipeId(int recipeId) {
         RecipeDetailViewState viewState = recipeDetailViewState.getValue();
@@ -62,7 +68,18 @@ public class RecipeDetailFragmentViewModel extends ViewModel {
     }
 
     void onStepClicked(Step step) {
-        Recipe recipe = recipeDetailViewState.getValue().recipe;
+        RecipeDetailViewState viewState = recipeDetailViewState.getValue();
 
+        if (viewState == null) {
+            return;
+        }
+
+        Recipe recipe = viewState.recipe;
+
+        startActivityViewState.setValue(new StartActivityViewState(recipe.getId(), step.getId(), RecipeStepDetailActivity.class));
+    }
+
+    void onActivityStarted() {
+        startActivityViewState.setValue(null);
     }
 }
