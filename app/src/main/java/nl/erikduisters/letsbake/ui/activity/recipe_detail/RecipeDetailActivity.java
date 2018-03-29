@@ -2,21 +2,25 @@ package nl.erikduisters.letsbake.ui.activity.recipe_detail;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import butterknife.BindView;
 import nl.erikduisters.letsbake.R;
+import nl.erikduisters.letsbake.data.local.RecipeRepository;
 import nl.erikduisters.letsbake.ui.BaseActivity;
+import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragment;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
  */
 
-public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewModel> implements ViewPager.OnPageChangeListener {
+public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewModel> {
     public static final String KEY_RECIPE_ID = "RecipeID";
+    public static final String TAG_RECIPE_DETAIL_FRAGMENT = "RecipeDetailFragment";
 
     @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -28,6 +32,21 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        int recipeId = getIntent().getIntExtra(KEY_RECIPE_ID, RecipeRepository.IMVALID_RECIPE_ID);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        Fragment fragment = fragmentManager.findFragmentByTag(TAG_RECIPE_DETAIL_FRAGMENT);
+
+        if (fragment == null) {
+            fragmentManager
+                    .beginTransaction()
+                    .add(R.id.fragmentPlaceholder, RecipeDetailFragment.newInstance(recipeId), TAG_RECIPE_DETAIL_FRAGMENT)
+                    .commit();
+        }
+
+        viewModel.getViewState().observe(this, this::render);
     }
 
     @Override
@@ -60,20 +79,5 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
         }
 
         return false;
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-
     }
 }

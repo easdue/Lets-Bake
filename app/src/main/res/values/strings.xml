@@ -6,4 +6,7 @@
     <string name="serves">Serves:</string>
     <string name="recipe_api_call_failure">Recipe API call failure: %s</string>
     <string name="no_recipes_available">No Recipes Available</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="recipe_id_unknown">A recipe with the requested Id does not exist</string>
+    <string name="recipe_id_invalid">The requested recipe Id is invalid</string>
 </resources>

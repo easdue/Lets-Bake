@@ -1,0 +1,10 @@
+App displays recipes from provided netword resource
+App allows navigation between individual recipes and recipe steps
+App uses RecyclerView and can handle recipe steps that include videos or images
+App uses Master Detail Flow to display recipe steps and navigation between them
+App users Exoplayer to display videos
+App properly initializes and releases video assets
+App should properly retrieve media assets from network links
+App uses espresso to test aspects of the UI
+App uses third-party libraries to enhance the app's features (eg. Butterknife, Room, Timber, Retrofit, Dagger2 etc)
+App has a companion homescreen widget that displays the ingredient list of the last selected/opened recipe

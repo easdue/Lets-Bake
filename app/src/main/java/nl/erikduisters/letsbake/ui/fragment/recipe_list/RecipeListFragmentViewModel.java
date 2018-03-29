@@ -21,6 +21,7 @@ import timber.log.Timber;
  * Created by Erik Duisters on 24-03-2018.
  */
 
+//TODO: Save selected recipeId in fragmentManager
 @Singleton
 public class RecipeListFragmentViewModel extends ViewModel {
     private final RecipeRepository recipeRepository;

@@ -12,6 +12,12 @@ public class Ingredient {
     public float getQuantity() {
         return quantity;
     }
+    public String getQuantityAsString() {
+        if (quantity % 1.0 == 0) {
+            return String.format("%.0f", quantity);
+        } else
+            return String.format("%.1f", quantity);
+    }
 
     public String getMeasure() {
         return measure;

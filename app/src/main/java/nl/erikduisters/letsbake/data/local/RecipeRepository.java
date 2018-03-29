@@ -35,6 +35,7 @@ import static nl.erikduisters.letsbake.data.usecase.SaveRecipesToCache.RequestIn
 @Singleton
 public class RecipeRepository {
     private static final String RECIPES_CACHE_FILE="recipes.json";
+    public static final int IMVALID_RECIPE_ID = -1;
 
     private final RecipeService recipeService;
     private final PreferenceManager preferenceManager;
@@ -119,6 +120,36 @@ public class RecipeRepository {
         }
     }
 
+    public void getRecipe(int recipeId, Callback<Recipe> callback) {
+        if (recipeList == null) {
+            getRecipes(new CallbackWrapper(callback, recipeId));
+
+            return;
+        }
+
+        Recipe recipe = getRecipeById(recipeId);
+
+        if (recipe == null) {
+            callback.onError(R.string.recipe_id_unknown, "");
+        } else {
+            callback.onResponse(recipe);
+        }
+    }
+
+    private @Nullable Recipe getRecipeById(int recipeId) {
+        if (recipeList == null) {
+            return null;
+        }
+
+        for (Recipe recipe : recipeList) {
+            if (recipe.getId() == recipeId) {
+                return recipe;
+            }
+        }
+
+        return null;
+    }
+
     private class RecipeCallback implements retrofit2.Callback<List<Recipe>> {
         private final Callback<List<Recipe>> callback;
 
@@ -182,5 +213,25 @@ public class RecipeRepository {
     public interface Callback<T> {
         void onResponse(@NonNull T response);
         void onError(@StringRes int error, @NonNull String errorArgument);
+    }
+
+    private class CallbackWrapper implements Callback<List<Recipe>> {
+        private final Callback<Recipe> callback;
+        private final int movieId;
+
+        CallbackWrapper(Callback<Recipe> callback, int movieId) {
+            this.callback = callback;
+            this.movieId = movieId;
+        }
+
+        @Override
+        public void onResponse(@NonNull List<Recipe> response) {
+            getRecipe(movieId, callback);
+        }
+
+        @Override
+        public void onError(@StringRes int error, @NonNull String errorArgument) {
+            callback.onError(error, errorArgument);
+        }
     }
 }

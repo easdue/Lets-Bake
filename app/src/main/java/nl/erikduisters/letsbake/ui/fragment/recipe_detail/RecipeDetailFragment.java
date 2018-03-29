@@ -4,38 +4,49 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import butterknife.BindView;
 import nl.erikduisters.letsbake.R;
+import nl.erikduisters.letsbake.data.model.Status;
 import nl.erikduisters.letsbake.data.model.Step;
 import nl.erikduisters.letsbake.ui.BaseFragment;
+import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentViewState.RecipeDetailViewState;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
  */
 
-public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewModel> implements RecipeAdapter.OnItemClickListener {
+public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewModel> implements RecipeAdapter.OnStepClickedListener {
+    private final static String KEY_RECIPE_ID = "RecipeId";
 
-    private final RecipeAdapter recipeAdapter;
+    private RecipeAdapter recipeAdapter;
+    private RecyclerView.LayoutManager layoutManager;
     private Context context;
 
-    public static RecipeDetailFragment newInstance(int movieId) {
+    @BindView(R.id.recyclerView) RecyclerView recyclerView;
+    @BindView(R.id.progressBar) ProgressBar progressBar;
+    @BindView(R.id.textView) TextView textView;
+
+    public static RecipeDetailFragment newInstance(int recipeId) {
         RecipeDetailFragment fragment = new RecipeDetailFragment();
 
         Bundle args = new Bundle();
-        //TODO: put recipe_id into bundle
+        args.putInt(KEY_RECIPE_ID, recipeId);
 
         fragment.setArguments(args);
 
         return fragment;
     }
 
-    public RecipeDetailFragment() {
-        recipeAdapter = new RecipeAdapter();
-        //recipeAdapter.setOnItemClickListener(this);
-    }
+    public RecipeDetailFragment() {}
 
     @Override
     public void onAttach(Context context) {
@@ -48,12 +59,24 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        recipeAdapter = new RecipeAdapter();
+        recipeAdapter.setOnStepClickedListener(this);
+
+        viewModel.getRecipeDetaiLViewState().observe(this, this::render);
+        viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
+        //TODO: RestoreRecyclerViewState if any
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
+
+        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recipeAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
         return v;
     }
@@ -66,7 +89,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
     @Override
     protected int getLayoutResId() {
-        return R.layout.fragment_movie_detail;
+        return R.layout.fragment_recipe_detail;
     }
 
     @Override
@@ -74,14 +97,40 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         return RecipeDetailFragmentViewModel.class;
     }
 
-    private void render(@Nullable RecipeDetailFragmentViewState viewState) {
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        recipeAdapter.setOnStepClickedListener(null);
+    }
+
+    private void render(@Nullable RecipeDetailViewState viewState) {
         if (viewState == null) {
             return;
+        }
+
+        switch (viewState.status) {
+            case Status.SUCCESS:
+                progressBar.setVisibility(View.INVISIBLE);
+                textView.setVisibility(View.INVISIBLE);
+
+                recipeAdapter.setRecipe(viewState.recipe);
+                break;
+            case Status.ERROR:
+                progressBar.setVisibility(View.GONE);
+                textView.setText(getString(viewState.errorLabel, viewState.errorArgument));
+                textView.setVisibility(View.VISIBLE);
+                break;
+            case Status.LOADING:
+                progressBar.setVisibility(View.VISIBLE);
+                textView.setText(viewState.loadingMessage);
+                textView.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
     @Override
-    public void onItemClick(Step recipe) {
-
+    public void onStepClicked(Step step) {
+        viewModel.onStepClicked(step);
     }
 }
