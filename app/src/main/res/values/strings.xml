@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Lets Bake</string>
+    <string name="recipe_detail">Recipe Detail</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="prefs_selected_recipe_id" translatable="false">SelectedRecipeID</string>
+    <string name="serves">Serves:</string>
+    <string name="recipe_api_call_failure">Recipe API call failure: %s</string>
+    <string name="no_recipes_available">No Recipes Available</string>
+</resources>

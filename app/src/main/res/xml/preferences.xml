@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:id="@+id/prefsSelectedRecipeID"
+        android:defaultValue="0"
+        android:key="@string/prefs_selected_recipe_id"
+        android:visibility="invisible"/>
+
+</PreferenceScreen>
