@@ -8,8 +8,8 @@ public class Step {
     private int id;
     private String shortDescription;
     private String description;
-    private String videoUrl;
-    private String thumbnailUrl;
+    private String videoURL;
+    private String thumbnailURL;
 
     public int getId() {
         return id;
@@ -23,11 +23,11 @@ public class Step {
         return description;
     }
 
-    public String getVideoUrl() {
-        return videoUrl;
+    public String getVideoURL() {
+        return videoURL;
     }
 
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
+    public String getThumbnailURL() {
+        return thumbnailURL;
     }
 }
