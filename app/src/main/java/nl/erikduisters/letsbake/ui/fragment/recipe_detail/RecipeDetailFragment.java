@@ -66,9 +66,9 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         recipeAdapter.setOnStepClickedListener(this);
 
         viewModel.getRecipeDetailViewState().observe(this, this::render);
-        viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
-
         viewModel.getStartActivityViewState().observe(this, this::render);
+
+        viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
 
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAYOUTMANAGER_STATE)) {
             RecipeDetailFragmentViewState.RecipeDetailViewState state = viewModel.getRecipeDetailViewState().getValue();

@@ -9,7 +9,10 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,7 +38,8 @@ import static nl.erikduisters.letsbake.data.usecase.SaveRecipesToCache.RequestIn
 @Singleton
 public class RecipeRepository {
     private static final String RECIPES_CACHE_FILE="recipes.json";
-    public static final int IMVALID_RECIPE_ID = -1;
+    public static final int INVALID_RECIPE_ID = -1;
+    public static final int INVALID_RECIPE_STEP_ID = -1;
 
     private final RecipeService recipeService;
     private final PreferenceManager preferenceManager;
@@ -45,6 +49,7 @@ public class RecipeRepository {
     private boolean recipesAreFromCache;
     private final File cacheFile;
     private final Gson gson;
+    private WaitingForRecipeListCallback waitingForRecipeListCallback;
 
     private @Nullable List<Recipe> recipeList;
 
@@ -122,9 +127,20 @@ public class RecipeRepository {
 
     public void getRecipe(int recipeId, Callback<Recipe> callback) {
         if (recipeList == null) {
-            getRecipes(new CallbackWrapper(callback, recipeId));
+            if (waitingForRecipeListCallback == null) {
+                waitingForRecipeListCallback = new WaitingForRecipeListCallback();
+                waitingForRecipeListCallback.addRecipeCallback(recipeId, callback);
+
+                getRecipes(waitingForRecipeListCallback);
+            } else {
+                waitingForRecipeListCallback.addRecipeCallback(recipeId, callback);
+            }
 
             return;
+        }
+
+        if (waitingForRecipeListCallback != null) {
+            waitingForRecipeListCallback = null;
         }
 
         Recipe recipe = getRecipeById(recipeId);
@@ -215,23 +231,52 @@ public class RecipeRepository {
         void onError(@StringRes int error, @NonNull String errorArgument);
     }
 
-    private class CallbackWrapper implements Callback<List<Recipe>> {
-        private final Callback<Recipe> callback;
-        private final int movieId;
+    private class WaitingForRecipeListCallback implements Callback<List<Recipe>> {
+        Map<Integer, List<Callback<Recipe>>> recipeCallbackMap;
 
-        CallbackWrapper(Callback<Recipe> callback, int movieId) {
-            this.callback = callback;
-            this.movieId = movieId;
+        WaitingForRecipeListCallback() {
+            recipeCallbackMap = new HashMap<>();
+        }
+
+        void addRecipeCallback(int recipeId, Callback<Recipe> callback) {
+            if (recipeCallbackMap.containsKey(recipeId)) {
+                recipeCallbackMap.get(recipeId).add(callback);
+            } else {
+                List<Callback<Recipe>> callbackList = new ArrayList<>();
+                callbackList.add(callback);
+
+                recipeCallbackMap.put(recipeId, callbackList);
+            }
         }
 
         @Override
         public void onResponse(@NonNull List<Recipe> response) {
-            getRecipe(movieId, callback);
+            Iterator<Map.Entry<Integer, List<Callback<Recipe>>>> iterator = recipeCallbackMap.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, List<Callback<Recipe>>> entry = iterator.next();
+
+                for (Callback<Recipe> callback : entry.getValue()) {
+                    getRecipe(entry.getKey(), callback);
+                }
+
+                iterator.remove();
+            }
         }
 
         @Override
-        public void onError(@StringRes int error, @NonNull String errorArgument) {
-            callback.onError(error, errorArgument);
+        public void onError(int error, @NonNull String errorArgument) {
+            Iterator<Map.Entry<Integer, List<Callback<Recipe>>>> iterator = recipeCallbackMap.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, List<Callback<Recipe>>> entry = iterator.next();
+
+                for (Callback<Recipe> callback : entry.getValue()) {
+                    callback.onError(error, errorArgument);
+                }
+
+                iterator.remove();
+            }
         }
     }
 }

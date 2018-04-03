@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Lets Bake</string>
     <string name="recipe_detail">Recipe Detail</string>
+    <string name="step_detail">Step Detail</string>
     <string name="loading">Loading&#8230;</string>
     <string name="prefs_selected_recipe_id" translatable="false">SelectedRecipeID</string>
     <string name="serves">Serves:</string>

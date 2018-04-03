@@ -31,10 +31,23 @@
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".ui.activity.main_activity.MainActivity"
-            android:label="@string/recipe_detail">
+            android:label="@string/recipe_detail"
+            android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activity.main_activity.MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".ui.activity.recipe_step_detail.RecipeStepDetailActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".ui.activity.recipe_detail.RecipeDetailActivity"
+            android:label="@string/step_detail"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activity.recipe_detail.RecipeDetailActivity"/>
         </activity>
 
     </application>

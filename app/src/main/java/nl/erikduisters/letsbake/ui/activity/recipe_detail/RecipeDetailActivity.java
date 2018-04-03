@@ -12,7 +12,10 @@ import butterknife.BindView;
 import nl.erikduisters.letsbake.R;
 import nl.erikduisters.letsbake.data.local.RecipeRepository;
 import nl.erikduisters.letsbake.ui.BaseActivity;
+import nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewState.RecipeDetailViewState;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragment;
+
+import static nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewState.FinishViewState;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
@@ -33,7 +36,7 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        int recipeId = getIntent().getIntExtra(KEY_RECIPE_ID, RecipeRepository.IMVALID_RECIPE_ID);
+        int recipeId = getIntent().getIntExtra(KEY_RECIPE_ID, RecipeRepository.INVALID_RECIPE_ID);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -47,11 +50,12 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
         }
 
         viewModel.getViewState().observe(this, this::render);
+        viewModel.setRecipeId(recipeId);
     }
 
     @Override
     protected int getLayoutResId() {
-        return R.layout.activity_detail;
+        return R.layout.activity_recipe_detail;
     }
 
     @Override
@@ -64,9 +68,23 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
             return;
         }
 
-        if (viewState instanceof RecipeDetailActivityViewState.FinishViewState) {
-            NavUtils.navigateUpFromSameTask(this);
-            viewModel.onFinished();
+        if (viewState instanceof FinishViewState) {
+            render((FinishViewState) viewState);
+        }
+
+        if (viewState instanceof RecipeDetailViewState) {
+            render((RecipeDetailViewState) viewState);
+        }
+    }
+
+    private void render(FinishViewState viewState) {
+        NavUtils.navigateUpFromSameTask(this);
+        viewModel.onFinished();
+    }
+
+    private void render(RecipeDetailViewState viewState) {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(viewState.recipeName);
         }
     }
 

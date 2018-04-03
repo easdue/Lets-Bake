@@ -50,7 +50,7 @@ public class RecipeDetailFragmentViewModel extends ViewModel {
             return;
         }
 
-        if (recipeId == RecipeRepository.IMVALID_RECIPE_ID) {
+        if (recipeId == RecipeRepository.INVALID_RECIPE_ID) {
             recipeDetailViewState.setValue(RecipeDetailViewState.getErrorState(R.string.recipe_id_invalid, ""));
         } else {
             recipeRepository.getRecipe(recipeId, new RecipeRepository.Callback<Recipe>() {

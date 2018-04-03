@@ -20,6 +20,7 @@ import nl.erikduisters.letsbake.MyApplication;
 import nl.erikduisters.letsbake.data.remote.RecipeService;
 import nl.erikduisters.letsbake.ui.activity.main_activity.MainActivitySubcomponent;
 import nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivitySubcomponent;
+import nl.erikduisters.letsbake.ui.activity.recipe_step_detail.RecipeStepDetailActivitySubcomponent;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -28,7 +29,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by Erik Duisters on 24-03-2018.
  */
 
-@Module(subcomponents = {MainActivitySubcomponent.class, RecipeDetailActivitySubcomponent.class})
+@Module(subcomponents = {MainActivitySubcomponent.class, RecipeDetailActivitySubcomponent.class, RecipeStepDetailActivitySubcomponent.class})
 abstract class AppModule {
     @Binds
     @Singleton

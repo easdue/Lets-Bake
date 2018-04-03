@@ -9,21 +9,14 @@ import dagger.android.support.FragmentKey;
 import dagger.multibindings.IntoMap;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragment;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentSubComponent;
-import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragment;
-import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentSubComponent;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
  */
-@Module(subcomponents = {RecipeDetailFragmentSubComponent.class, RecipeStepDetailFragmentSubComponent.class})
+@Module(subcomponents = {RecipeDetailFragmentSubComponent.class})
 abstract class RecipeDetailActivityBindingModule {
     @Binds
     @IntoMap
     @FragmentKey(RecipeDetailFragment.class)
     abstract AndroidInjector.Factory<? extends Fragment> bindMovieDetailActivityFragmentInjectorFactory(RecipeDetailFragmentSubComponent.Builder builder);
-
-    @Binds
-    @IntoMap
-    @FragmentKey(RecipeStepDetailFragment.class)
-    abstract AndroidInjector.Factory<? extends Fragment> bindMovieReviewsFFragmentInjectorFactory(RecipeStepDetailFragmentSubComponent.Builder builder);
 }

@@ -7,6 +7,7 @@ import dagger.Module;
 import dagger.multibindings.IntoMap;
 import nl.erikduisters.letsbake.ui.activity.main_activity.MainActivityViewModel;
 import nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewModel;
+import nl.erikduisters.letsbake.ui.activity.recipe_step_detail.RecipeStepDetailActivityViewModel;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentViewModel;
 import nl.erikduisters.letsbake.ui.fragment.recipe_list.RecipeListFragmentViewModel;
 import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentViewModel;
@@ -25,20 +26,25 @@ abstract class ViewModelBindingModule {
     @Binds
     @IntoMap
     @ViewModelKey(RecipeListFragmentViewModel.class)
-    abstract ViewModel bindMovieListFragmentViewModel(RecipeListFragmentViewModel viewModel);
+    abstract ViewModel bindRecipeListFragmentViewModel(RecipeListFragmentViewModel viewModel);
 
     @Binds
     @IntoMap
     @ViewModelKey(RecipeDetailActivityViewModel.class)
-    abstract ViewModel bindDetailActivityViewModel(RecipeDetailActivityViewModel viewModel);
+    abstract ViewModel bindRecipeDetailActivityViewModel(RecipeDetailActivityViewModel viewModel);
 
     @Binds
     @IntoMap
     @ViewModelKey(RecipeDetailFragmentViewModel.class)
-    abstract ViewModel bindMovieDetailFragmentViewModel(RecipeDetailFragmentViewModel viewModel);
+    abstract ViewModel bindRecipeDetailFragmentViewModel(RecipeDetailFragmentViewModel viewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(RecipeStepDetailActivityViewModel.class)
+    abstract ViewModel bindRecipeStepDetailActivityViewModel(RecipeStepDetailActivityViewModel viewModel);
 
     @Binds
     @IntoMap
     @ViewModelKey(RecipeStepDetailFragmentViewModel.class)
-    abstract ViewModel bindMovieReviewsFragmentViewModel(RecipeStepDetailFragmentViewModel viewModel);
+    abstract ViewModel bindRecipeStepDetailFragmentViewModel(RecipeStepDetailFragmentViewModel viewModel);
 }
