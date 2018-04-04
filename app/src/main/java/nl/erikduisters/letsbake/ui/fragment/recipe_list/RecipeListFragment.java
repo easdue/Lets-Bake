@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,6 +33,8 @@ public class RecipeListFragment extends BaseFragment<RecipeListFragmentViewModel
     private RecyclerView.LayoutManager layoutManager;
     private RecipeAdapter recipeAdapter;
     private Parcelable layoutManagerState;
+    private boolean isTablet;
+    private boolean isLandscape;
 
     public static RecipeListFragment newInstance() {
         return new RecipeListFragment();
@@ -54,6 +57,9 @@ public class RecipeListFragment extends BaseFragment<RecipeListFragmentViewModel
                 layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUTMANAGER_STATE);
             }
         }
+
+        isTablet = getResources().getBoolean(R.bool.isTablet);
+        isLandscape = getResources().getBoolean(R.bool.isLandscape);
     }
 
     @Nullable
@@ -61,7 +67,11 @@ public class RecipeListFragment extends BaseFragment<RecipeListFragmentViewModel
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
-        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        if (isTablet && isLandscape) {
+            layoutManager = new GridLayoutManager(getContext(), 3, GridLayoutManager.VERTICAL, false);
+        } else {
+            layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        }
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
