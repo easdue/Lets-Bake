@@ -40,14 +40,12 @@ import nl.erikduisters.letsbake.ui.BaseFragment;
 import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentViewState.RecipeStepDetailViewState;
 import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator;
 import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator.Position;
-import timber.log.Timber;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
  */
 
 //TODO: Maybe return currentStepId to calling activity so RecipeDetailFragment can update its scroll position?
-//TODO: Initialize player in onStart and onResume() depending on api (split screen) and release in onPause and onStop()
 public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragmentViewModel> {
     public static final String KEY_RECIPE_ID = "RecipeId";
     public static final String KEY_RECIPE_STEP_ID = "RecipeStepId";
@@ -64,6 +62,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     private DataSource.Factory dataSourceFactory;
     private OnScrollListener onScrollListener;
     private boolean isLandscape;
+    private boolean onScrollListenerCallPending;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
@@ -96,6 +95,8 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         super.onCreate(savedInstanceState);
 
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
+
+        dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(getContext(), context.getString(R.string.app_name)), null);
 
         stepAdapter = new StepAdapter(isLandscape);
         onScrollListener = new OnScrollListener();
@@ -139,7 +140,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView);
 
-        initializeExoPlayer();
+        //initializeExoPlayer();
 
         return v;
     }
@@ -147,6 +148,10 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     @Override
     public void onStart() {
         super.onStart();
+
+        if (Util.SDK_INT > 23) {
+            initializeExoPlayer();
+        }
     }
 
     @Override
@@ -166,23 +171,36 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
             getActivity().getWindow().setAttributes(attrs);
         }
+
+        if ((Util.SDK_INT <= 23 || simpleExoPlayer == null)) {
+            initializeExoPlayer();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        simpleExoPlayer.release();
+    private void releasePlayer() {
+        if (simpleExoPlayer != null) {
+            currentPlaybackPosition = simpleExoPlayer.getCurrentPosition();
+            simpleExoPlayer.release();
+            simpleExoPlayer = null;
+        }
     }
 
     @Override
@@ -201,7 +219,12 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
         outState.putParcelable(KEY_LAYOUT_MANAGER_STATE, layoutManager.onSaveInstanceState());
         outState.putInt(KEY_RECIPE_STEP_ID, currentStepId);
-        outState.putLong(KEY_PLAYBACK_POSISTION, simpleExoPlayer.getCurrentPosition());
+
+        if (simpleExoPlayer != null) {
+            currentPlaybackPosition = simpleExoPlayer.getCurrentPosition();
+        }
+
+        outState.putLong(KEY_PLAYBACK_POSISTION, currentPlaybackPosition);
 
     }
 
@@ -223,10 +246,13 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
                 stepAdapter.setSteps(viewState.recipe.getSteps());
 
                 recyclerView.scrollToPosition(currentStepId);
+
                 if (layoutManagerState != null) {
                     layoutManager.onRestoreInstanceState(layoutManagerState);
                     layoutManagerState = null;
                 }
+
+                onScrollListenerCallPending = true;
 
                 recyclerView.post(new Runnable() {
                     @Override
@@ -243,12 +269,21 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     }
 
     private void initializeExoPlayer() {
-        TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter());
-        TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
+        if (simpleExoPlayer == null) {
+            TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter());
+            TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
 
-        simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+            simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+        }
 
-        dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(getContext(), context.getString(R.string.app_name)), null);
+        if (stepAdapter.getSteps().size() > 0 && !onScrollListenerCallPending) {
+            recyclerView.post(new Runnable() {
+                @Override
+                public void run() {
+                    onScrollListener.onScrolled(recyclerView, 1, 0);
+                }
+            });
+        }
     }
 
     private class OnScrollListener extends RecyclerView.OnScrollListener {
@@ -261,13 +296,15 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
             }
 
             int pos = layoutManager.findFirstCompletelyVisibleItemPosition();
+
             if (pos != RecyclerView.NO_POSITION) {
-                Timber.e("Showing pos: %d", pos);
                 Step step = stepAdapter.getSteps().get(pos);
                 currentStepId = step.getId();
 
                 setMediaSource(step);
             }
+
+            onScrollListenerCallPending = false;
         }
 
         private void setMediaSource(Step step) {
@@ -280,6 +317,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
                         .createMediaSource(Uri.parse(step.getVideoURL()));
 
                 simpleExoPlayer.prepare(mediaSource);
+
                 if (currentPlaybackPosition != -1) {
                     simpleExoPlayer.seekTo(currentPlaybackPosition);
                     currentPlaybackPosition = -1;

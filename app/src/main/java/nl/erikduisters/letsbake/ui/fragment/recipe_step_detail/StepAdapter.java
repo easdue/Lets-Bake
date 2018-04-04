@@ -96,7 +96,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
         }
 
         void bind(Step step) {
-            Timber.d("bind stepId=%d", step.getId());
+            Timber.e("bind stepId=%d", step.getId());
 
             boolean videoAvailable = !step.getVideoURL().isEmpty() && step.getVideoURL().endsWith(".mp4");
             boolean thumbnailAvailable = !step.getThumbnailURL().isEmpty() && isImageUrl(step.getThumbnailURL());
@@ -147,7 +147,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
 
         ViewHolder vh = (ViewHolder) recyclerView.findViewHolderForAdapterPosition(adapterPos);
 
-        if (prevPlayerView == null) {
+        if (prevPlayerView == null || vh.playerView.getPlayer() != prevPlayerView) {
             vh.playerView.setPlayer(exoPlayer);
         } else {
             PlayerView.switchTargetView(exoPlayer, prevPlayerView, vh.playerView);
