@@ -28,6 +28,11 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
     private List<Step> steps;
     private RecyclerView recyclerView;
     private PlayerView prevPlayerView;
+    private final boolean isLandscape;
+
+    StepAdapter(boolean isLandscape) {
+        this.isLandscape = isLandscape;
+    }
 
     void setSteps(List<Step> steps) {
         this.steps = steps;
@@ -57,7 +62,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_step_detail_list_item, parent, false);
 
-        return new ViewHolder(v);
+        return new ViewHolder(v, isLandscape);
     }
 
     @Override
@@ -73,14 +78,21 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.playerView) PlayerView playerView;
         @BindView(R.id.imageView) ImageView imageView;
-        @BindView(R.id.stepDescription) TextView textView;
+        TextView textView;
 
         private Step step;
+        private final boolean isLandscape;
 
-        ViewHolder(View itemView) {
+        ViewHolder(View itemView, boolean isLandscape) {
             super(itemView);
 
+            this.isLandscape = isLandscape;
+
             ButterKnife.bind(this, itemView);
+
+            if (!isLandscape) {
+                textView = itemView.findViewById(R.id.stepDescription);
+            }
         }
 
         void bind(Step step) {
@@ -105,6 +117,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
                         .into(imageView);
 
                 imageView.setVisibility(View.VISIBLE);
+
                 playerView.setVisibility(View.INVISIBLE);
             } else {
                 imageView.setVisibility(View.INVISIBLE);
@@ -115,7 +128,9 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
                 imageView.setVisibility(View.VISIBLE);
             }
 
-            textView.setText(step.getDescription());
+            if (!isLandscape) {
+                textView.setText(step.getDescription());
+            }
         }
 
         private boolean isImageUrl(String url) {

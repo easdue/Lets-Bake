@@ -6,12 +6,15 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -36,12 +39,15 @@ import nl.erikduisters.letsbake.data.model.Step;
 import nl.erikduisters.letsbake.ui.BaseFragment;
 import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentViewState.RecipeStepDetailViewState;
 import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator;
+import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator.Position;
 import timber.log.Timber;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
  */
 
+//TODO: Maybe return currentStepId to calling activity so RecipeDetailFragment can update its scroll position?
+//TODO: Initialize player in onStart and onResume() depending on api (split screen) and release in onPause and onStop()
 public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragmentViewModel> {
     public static final String KEY_RECIPE_ID = "RecipeId";
     public static final String KEY_RECIPE_STEP_ID = "RecipeStepId";
@@ -56,14 +62,14 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     private Context context;
     private SimpleExoPlayer simpleExoPlayer;
     private DataSource.Factory dataSourceFactory;
-    private final OnScrollListener onScrollListener;
+    private OnScrollListener onScrollListener;
+    private boolean isLandscape;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
     @BindView(R.id.textView) TextView textView;
 
     public RecipeStepDetailFragment() {
-        onScrollListener = new OnScrollListener();
     }
 
     public static RecipeStepDetailFragment newInstance(int recipeId, int stepId) {
@@ -89,8 +95,10 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        stepAdapter = new StepAdapter();
-        initializeExoPlayer();
+        isLandscape = getResources().getBoolean(R.bool.isLandscape);
+
+        stepAdapter = new StepAdapter(isLandscape);
+        onScrollListener = new OnScrollListener();
 
         viewModel.getRecipeStepDetailViewState().observe(this, this::render);
 
@@ -119,17 +127,55 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
         ButterKnife.bind(this, v);
 
+        recyclerView = v.findViewById(R.id.recyclerView);
+
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(stepAdapter);
         recyclerView.addOnScrollListener(onScrollListener);
-        recyclerView.addItemDecoration(new CircularPageIndicatorDecorator(context));
+        recyclerView.addItemDecoration(new CircularPageIndicatorDecorator(context, isLandscape ? Position.TOP : Position.BOTTOM));
 
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView);
 
+        initializeExoPlayer();
+
         return v;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (isLandscape) {
+            WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
+
+            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+
+            ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+
+            getActivity().getWindow().setAttributes(attrs);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -173,6 +219,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
             case Status.SUCCESS:
                 progressBar.setVisibility(View.INVISIBLE);
                 textView.setVisibility(View.INVISIBLE);
+
                 stepAdapter.setSteps(viewState.recipe.getSteps());
 
                 recyclerView.scrollToPosition(currentStepId);
@@ -184,8 +231,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
                 recyclerView.post(new Runnable() {
                     @Override
                     public void run() {
-                        onScrollListener.onScrolled(recyclerView, 1, 0);
-                    }
+                        onScrollListener.onScrolled(recyclerView, 1, 0); }
                 });
                 break;
             case Status.ERROR:
@@ -203,7 +249,6 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
 
         dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(getContext(), context.getString(R.string.app_name)), null);
-        //dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(context, context.getString(R.string.app_name)));
     }
 
     private class OnScrollListener extends RecyclerView.OnScrollListener {
@@ -246,5 +291,4 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
             }
         }
     }
-
 }

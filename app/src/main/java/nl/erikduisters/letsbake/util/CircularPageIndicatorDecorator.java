@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.support.annotation.IntDef;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import nl.erikduisters.letsbake.R;
 
@@ -28,32 +31,53 @@ import nl.erikduisters.letsbake.R;
  */
 public class CircularPageIndicatorDecorator extends RecyclerView.ItemDecoration {
     private final int indicatorHeight;
+    private final float indicatorBackgroundStrokeWidth;
+    private final float indicatorBackgroundDiameter;
     private final float indicatorOutlineStrokeWidth;
     private final float indicatorOutlineDiameter;
     private final float indicatorPadding;
     private final Interpolator interpolator;
+    private final Paint backgroundPaint;
     private final Paint outlinePaint;
     private final Paint indicatorPaint;
-    private final int activeColor;
-    private final int inActiveColor;
 
-    public CircularPageIndicatorDecorator(Context context) {
+    @IntDef({Position.TOP, Position.BOTTOM})
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Position {
+        final int TOP = 0;
+        final int BOTTOM = 1;
+    }
+
+    private final @Position int position;
+
+    public CircularPageIndicatorDecorator(Context context, @Position int position) {
+        this.position = position;
+
         float DP = Resources.getSystem().getDisplayMetrics().density;
 
         indicatorHeight = (int) (DP * 36);
+        indicatorBackgroundStrokeWidth = DP * 1;
+        indicatorBackgroundDiameter = DP * 9;
         indicatorOutlineStrokeWidth = DP * 2;
         indicatorOutlineDiameter = DP * 8;
         indicatorPadding = DP * 8;
 
-        activeColor = context.getResources().getColor(R.color.colorAccent);
-        inActiveColor = 0x66000000;
+        int activeColor = context.getResources().getColor(R.color.colorAccent);
+        int inActiveColor = 0x66000000;
 
         interpolator = new AccelerateDecelerateInterpolator();
+
         outlinePaint = new Paint();
         outlinePaint.setStrokeWidth(indicatorOutlineStrokeWidth);
         outlinePaint.setStyle(Paint.Style.STROKE);
         outlinePaint.setAntiAlias(true);
         outlinePaint.setColor(inActiveColor);
+
+        backgroundPaint = new Paint();
+        backgroundPaint.setStrokeWidth(indicatorBackgroundStrokeWidth);
+        backgroundPaint.setStyle(Paint.Style.STROKE);
+        backgroundPaint.setAntiAlias(true);
+        backgroundPaint.setColor(0xFFFFFFFF);
 
         indicatorPaint = new Paint();
         indicatorPaint.setStyle(Paint.Style.FILL);
@@ -74,7 +98,13 @@ public class CircularPageIndicatorDecorator extends RecyclerView.ItemDecoration 
         float indicatorStartX = (parent.getWidth() - indicatorTotalWidth) / 2F;
 
         // center vertically in the allotted space
-        float indicatorPosY = parent.getHeight() - indicatorHeight / 2F;
+        float indicatorPosY;
+
+        if (position == Position.BOTTOM ) {
+            indicatorPosY = parent.getHeight() - indicatorHeight / 2F;
+        } else {
+            indicatorPosY = indicatorHeight / 2F;
+        }
 
         drawInactiveIndicators(c, indicatorStartX, indicatorPosY, itemCount);
 
@@ -104,7 +134,8 @@ public class CircularPageIndicatorDecorator extends RecyclerView.ItemDecoration 
         float start = indicatorStartX;
         for (int i = 0; i < itemCount; i++) {
 
-            c.drawCircle(start, indicatorPosY, indicatorOutlineDiameter / 2F, outlinePaint);
+            c.drawCircle(start, indicatorPosY,indicatorBackgroundDiameter / 2F, backgroundPaint);
+            c.drawCircle(start, indicatorPosY,indicatorOutlineDiameter / 2F, outlinePaint);
 
             start += itemWidth;
         }
@@ -129,11 +160,5 @@ public class CircularPageIndicatorDecorator extends RecyclerView.ItemDecoration 
 
             c.drawCircle(highlightStart + partialLength, indicatorPosY, (indicatorOutlineDiameter-indicatorOutlineStrokeWidth) / 2F, indicatorPaint);
         }
-    }
-
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        outRect.bottom = indicatorHeight;
     }
 }
