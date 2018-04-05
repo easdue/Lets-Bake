@@ -64,5 +64,8 @@ interface RecipeDetailFragmentViewState {
 
             return intent;
         }
+
+        int getRecipeId() { return recipeId; }
+        int getStepId() { return getStepId(); }
     }
 }

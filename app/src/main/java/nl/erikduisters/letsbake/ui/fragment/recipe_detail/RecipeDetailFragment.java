@@ -27,12 +27,16 @@ import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentVi
 
 public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewModel> implements RecipeAdapter.OnStepClickedListener {
     private final static String KEY_RECIPE_ID = "RecipeId";
+    private final static String KEY_SELECTED_STEP_ID = "SelectedStepId";
     private final static String KEY_LAYOUTMANAGER_STATE = "LayoutManagerState";
 
     private RecipeAdapter recipeAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private Context context;
     private Parcelable layoutManagerState;
+    private boolean isTablet;
+    private boolean isLandscape;
+    private int selectedStepId;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
@@ -58,17 +62,28 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         this.context = context;
     }
 
+    //TODO: Save and restore selectedStepId
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        isTablet = getResources().getBoolean(R.bool.isTablet);
+        isLandscape = getResources().getBoolean(R.bool.isLandscape);
+
         recipeAdapter = new RecipeAdapter();
         recipeAdapter.setOnStepClickedListener(this);
+        recipeAdapter.setSelectionEnabled(isTablet && isLandscape);
 
         viewModel.getRecipeDetailViewState().observe(this, this::render);
         viewModel.getStartActivityViewState().observe(this, this::render);
 
-        viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey(KEY_RECIPE_ID)) {
+            viewModel.setRecipeId(getArguments().getInt(KEY_RECIPE_ID));
+        }
+
+        selectedStepId = -1;
 
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAYOUTMANAGER_STATE)) {
             RecipeDetailFragmentViewState.RecipeDetailViewState state = viewModel.getRecipeDetailViewState().getValue();
@@ -76,6 +91,8 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
             if (state == null || state.status == Status.LOADING) {
                 layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUTMANAGER_STATE);
             }
+
+            selectedStepId = savedInstanceState.getInt(KEY_SELECTED_STEP_ID);
         }
     }
 
@@ -98,6 +115,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(KEY_LAYOUTMANAGER_STATE, layoutManager.onSaveInstanceState());
+        outState.putInt(KEY_SELECTED_STEP_ID, selectedStepId);
     }
 
     @Override
@@ -128,6 +146,18 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
                 textView.setVisibility(View.INVISIBLE);
 
                 recipeAdapter.setRecipe(viewState.recipe);
+
+                if (selectedStepId == -1) {
+                    Step step = viewState.recipe.getSteps().get(0);
+
+                    selectedStepId = step.getId();
+
+                    if (isTablet && isLandscape) {
+                        viewModel.onStepClicked(step);
+                    }
+                }
+
+                recipeAdapter.setSelectedStepId(selectedStepId);
 
                 if (layoutManagerState != null) {
                     layoutManager.onRestoreInstanceState(layoutManagerState);
@@ -160,5 +190,15 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     @Override
     public void onStepClicked(Step step) {
         viewModel.onStepClicked(step);
+
+        selectedStepId = step.getId();
+
+        if (isLandscape && isTablet) {
+            recipeAdapter.setSelectedStepId(step.getId());
+        }
+    }
+
+    public void setRecipeId(int recipeId) {
+        viewModel.setRecipeId(recipeId);
     }
 }

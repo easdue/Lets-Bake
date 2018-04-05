@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -25,22 +26,24 @@ import timber.log.Timber;
  */
 
 public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
-    private List<Step> steps;
+    private @NonNull List<Step> steps;
     private RecyclerView recyclerView;
     private PlayerView prevPlayerView;
-    private final boolean isLandscape;
+    private final boolean showDescription;
 
-    StepAdapter(boolean isLandscape) {
-        this.isLandscape = isLandscape;
+    StepAdapter(boolean showDescription) {
+        this.showDescription = showDescription;
+
+        steps = new ArrayList<>();
     }
 
-    void setSteps(List<Step> steps) {
+    void setSteps(@NonNull List<Step> steps) {
         this.steps = steps;
 
         notifyDataSetChanged();
     }
 
-    List<Step> getSteps() {
+    @NonNull List<Step> getSteps() {
         return steps;
     }
 
@@ -62,7 +65,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_step_detail_list_item, parent, false);
 
-        return new ViewHolder(v, isLandscape);
+        return new ViewHolder(v, showDescription);
     }
 
     @Override
@@ -81,16 +84,16 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
         TextView textView;
 
         private Step step;
-        private final boolean isLandscape;
+        private final boolean showDescription;
 
-        ViewHolder(View itemView, boolean isLandscape) {
+        ViewHolder(View itemView, boolean showDescription) {
             super(itemView);
 
-            this.isLandscape = isLandscape;
+            this.showDescription = showDescription;
 
             ButterKnife.bind(this, itemView);
 
-            if (!isLandscape) {
+            if (showDescription ) {
                 textView = itemView.findViewById(R.id.stepDescription);
             }
         }
@@ -128,7 +131,7 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
                 imageView.setVisibility(View.VISIBLE);
             }
 
-            if (!isLandscape) {
+            if (showDescription) {
                 textView.setText(step.getDescription());
             }
         }

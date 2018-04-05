@@ -1,5 +1,6 @@
 package nl.erikduisters.letsbake.ui.fragment.recipe_step_detail;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import nl.erikduisters.letsbake.R;
 import nl.erikduisters.letsbake.data.model.Status;
 import nl.erikduisters.letsbake.data.model.Step;
 import nl.erikduisters.letsbake.ui.BaseFragment;
+import nl.erikduisters.letsbake.ui.activity.recipe_detail.SelectedStepChangeListener;
 import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentViewState.RecipeStepDetailViewState;
 import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator;
 import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator.Position;
@@ -55,14 +57,17 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     private StepAdapter stepAdapter;
     private LinearLayoutManager layoutManager;
     private Parcelable layoutManagerState;
+    private int currentRecipeId;
     private int currentStepId;
     private long currentPlaybackPosition;
     private Context context;
     private SimpleExoPlayer simpleExoPlayer;
     private DataSource.Factory dataSourceFactory;
     private OnScrollListener onScrollListener;
+    private boolean isTablet;
     private boolean isLandscape;
     private boolean onScrollListenerCallPending;
+    private SelectedStepChangeListener selectedStepChangeListener;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
@@ -91,34 +96,55 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            selectedStepChangeListener = (SelectedStepChangeListener) activity;
+        } catch (ClassCastException e) {
+            //Not interested
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        selectedStepChangeListener = null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        isTablet = getResources().getBoolean(R.bool.isTablet);
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
 
         dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(getContext(), context.getString(R.string.app_name)), null);
 
-        stepAdapter = new StepAdapter(isLandscape);
+        stepAdapter = new StepAdapter(!isLandscape || isTablet);
         onScrollListener = new OnScrollListener();
 
         viewModel.getRecipeStepDetailViewState().observe(this, this::render);
-
-        Bundle args = getArguments();
-
-        if (args == null) {
-            throw new RuntimeException("You must instantiate RecipeStepDetailFragment by calling newInstance(int, int)");
-        }
 
         if (savedInstanceState != null) {
             layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER_STATE);
             currentStepId = savedInstanceState.getInt(KEY_RECIPE_STEP_ID);
             currentPlaybackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSISTION);
         } else {
-            currentStepId = args.getInt(KEY_RECIPE_STEP_ID);
             currentPlaybackPosition = -1;
         }
 
-        viewModel.setRecipeId(args.getInt(KEY_RECIPE_ID));
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey(KEY_RECIPE_ID) && args.containsKey(KEY_RECIPE_STEP_ID)) {
+            currentRecipeId = args.getInt(KEY_RECIPE_ID);
+            viewModel.setRecipeId(currentRecipeId);
+            currentStepId = args.getInt(KEY_RECIPE_STEP_ID);
+        } else {
+            currentRecipeId = -1;
+            currentStepId = -1;
+        }
     }
 
     @Nullable
@@ -135,7 +161,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(stepAdapter);
         recyclerView.addOnScrollListener(onScrollListener);
-        recyclerView.addItemDecoration(new CircularPageIndicatorDecorator(context, isLandscape ? Position.TOP : Position.BOTTOM));
+        recyclerView.addItemDecoration(new CircularPageIndicatorDecorator(context, isLandscape && !isTablet ? Position.TOP : Position.BOTTOM));
 
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView);
@@ -158,7 +184,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     public void onResume() {
         super.onResume();
 
-        if (isLandscape) {
+        if (isLandscape && !isTablet) {
             WindowManager.LayoutParams attrs = getActivity().getWindow().getAttributes();
 
             attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -245,20 +271,24 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
                 stepAdapter.setSteps(viewState.recipe.getSteps());
 
-                recyclerView.scrollToPosition(currentStepId);
-
                 if (layoutManagerState != null) {
                     layoutManager.onRestoreInstanceState(layoutManagerState);
                     layoutManagerState = null;
                 }
 
-                onScrollListenerCallPending = true;
 
-                recyclerView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onScrollListener.onScrolled(recyclerView, 1, 0); }
-                });
+                if (currentStepId != -1) {
+                    recyclerView.scrollToPosition(currentStepId);
+
+                    onScrollListenerCallPending = true;
+
+                    recyclerView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onScrollListener.onScrolled(recyclerView, 1, 0); }
+                    });
+                }
+
                 break;
             case Status.ERROR:
                 progressBar.setVisibility(View.GONE);
@@ -276,7 +306,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
             simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
         }
 
-        if (stepAdapter.getSteps().size() > 0 && !onScrollListenerCallPending) {
+        if (stepAdapter.getSteps().size() > 0 && !onScrollListenerCallPending && currentStepId != -1) {
             recyclerView.post(new Runnable() {
                 @Override
                 public void run() {
@@ -299,9 +329,16 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
             if (pos != RecyclerView.NO_POSITION) {
                 Step step = stepAdapter.getSteps().get(pos);
+
+                boolean stepChanged = currentStepId != step.getId();
+
                 currentStepId = step.getId();
 
                 setMediaSource(step);
+
+                if (stepChanged && selectedStepChangeListener != null) {
+                    selectedStepChangeListener.onSelectedStepChanged(step);
+                }
             }
 
             onScrollListenerCallPending = false;
@@ -326,6 +363,34 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
                 stepAdapter.setSimpleExoPlayer(simpleExoPlayer, currentStepId);
 
                 simpleExoPlayer.setPlayWhenReady(true);
+            }
+        }
+    }
+
+    public void setRecipeId(int recipeId) {
+        currentRecipeId = recipeId;
+        viewModel.setRecipeId(recipeId);
+    }
+
+    public void setStepId(int stepId) {
+        if (currentStepId == stepId) {
+            return;
+        }
+
+        currentStepId = stepId;
+
+        RecipeStepDetailViewState viewState = viewModel.getRecipeStepDetailViewState().getValue();
+
+        if (viewState == null || viewState.status == Status.SUCCESS && viewState.recipe.getId() == currentRecipeId) {
+            if (!onScrollListenerCallPending) {
+                recyclerView.scrollToPosition(currentStepId);
+
+                recyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onScrollListener.onScrolled(recyclerView, 1, 0);
+                    }
+                });
             }
         }
     }

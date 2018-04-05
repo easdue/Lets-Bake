@@ -23,6 +23,7 @@ import nl.erikduisters.letsbake.ui.BaseFragment;
  * Created by Erik Duisters on 24-03-2018.
  */
 
+//TODO: increase font size for higher res devices
 public class RecipeListFragment extends BaseFragment<RecipeListFragmentViewModel> implements RecipeAdapter.OnItemClickListener {
     private final static String KEY_LAYOUTMANAGER_STATE = "LayoutManagerState";
 

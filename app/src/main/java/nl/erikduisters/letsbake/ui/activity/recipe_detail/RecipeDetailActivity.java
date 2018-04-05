@@ -1,5 +1,6 @@
 package nl.erikduisters.letsbake.ui.activity.recipe_detail;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,9 +12,12 @@ import android.view.MenuItem;
 import butterknife.BindView;
 import nl.erikduisters.letsbake.R;
 import nl.erikduisters.letsbake.data.local.RecipeRepository;
+import nl.erikduisters.letsbake.data.model.Step;
 import nl.erikduisters.letsbake.ui.BaseActivity;
 import nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewState.RecipeDetailViewState;
+import nl.erikduisters.letsbake.ui.activity.recipe_step_detail.RecipeStepDetailActivity;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragment;
+import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragment;
 
 import static nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewState.FinishViewState;
 
@@ -21,15 +25,24 @@ import static nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailAct
  * Created by Erik Duisters on 24-03-2018.
  */
 
-public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewModel> {
+public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewModel>
+        implements SelectedStepChangeListener {
     public static final String KEY_RECIPE_ID = "RecipeID";
     public static final String TAG_RECIPE_DETAIL_FRAGMENT = "RecipeDetailFragment";
 
     @BindView(R.id.toolbar) Toolbar toolbar;
 
+    private boolean isTablet;
+    private boolean isLandscape;
+    private RecipeDetailFragment detailFragment;
+    private RecipeStepDetailFragment stepDetailFragment;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        isTablet = getResources().getBoolean(R.bool.isTablet);
+        isLandscape = getResources().getBoolean(R.bool.isLandscape);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -40,13 +53,22 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        Fragment fragment = fragmentManager.findFragmentByTag(TAG_RECIPE_DETAIL_FRAGMENT);
+        if (isTablet && isLandscape) {
+            detailFragment = (RecipeDetailFragment) fragmentManager.findFragmentById(R.id.recipeListFragment);
+            stepDetailFragment = (RecipeStepDetailFragment) fragmentManager.findFragmentById(R.id.recipeStepDetailFragment);
 
-        if (fragment == null) {
-            fragmentManager
-                    .beginTransaction()
-                    .add(R.id.fragmentPlaceholder, RecipeDetailFragment.newInstance(recipeId), TAG_RECIPE_DETAIL_FRAGMENT)
-                    .commit();
+            detailFragment.setRecipeId(recipeId);
+
+            stepDetailFragment.setRecipeId(recipeId);
+        } else {
+            Fragment fragment = fragmentManager.findFragmentByTag(TAG_RECIPE_DETAIL_FRAGMENT);
+
+            if (fragment == null) {
+                fragmentManager
+                        .beginTransaction()
+                        .add(R.id.fragmentPlaceholder, RecipeDetailFragment.newInstance(recipeId), TAG_RECIPE_DETAIL_FRAGMENT)
+                        .commit();
+            }
         }
 
         viewModel.getViewState().observe(this, this::render);
@@ -97,5 +119,21 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
         }
 
         return false;
+    }
+
+    @Override
+    public void startActivityFromFragment(Fragment fragment, Intent intent, int requestCode, @Nullable Bundle options) {
+        if (isTablet && isLandscape) {
+            stepDetailFragment.setStepId(intent.getIntExtra(RecipeStepDetailActivity.KEY_STEP_ID, RecipeRepository.INVALID_RECIPE_STEP_ID));
+        } else {
+            super.startActivityFromFragment(fragment, intent, requestCode, options);
+        }
+    }
+
+    @Override
+    public void onSelectedStepChanged(Step step) {
+        if (isTablet && isLandscape) {
+            detailFragment.onStepClicked(step);
+        }
     }
 }
