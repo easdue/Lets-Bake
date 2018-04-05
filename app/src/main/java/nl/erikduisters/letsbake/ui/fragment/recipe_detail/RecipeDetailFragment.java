@@ -62,7 +62,6 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         this.context = context;
     }
 
-    //TODO: Save and restore selectedStepId
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

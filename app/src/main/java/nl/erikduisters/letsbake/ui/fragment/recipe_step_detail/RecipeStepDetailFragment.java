@@ -47,7 +47,6 @@ import nl.erikduisters.letsbake.util.CircularPageIndicatorDecorator.Position;
  * Created by Erik Duisters on 24-03-2018.
  */
 
-//TODO: Maybe return currentStepId to calling activity so RecipeDetailFragment can update its scroll position?
 public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragmentViewModel> {
     public static final String KEY_RECIPE_ID = "RecipeId";
     public static final String KEY_RECIPE_STEP_ID = "RecipeStepId";

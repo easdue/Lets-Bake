@@ -16,7 +16,6 @@ interface RecipeStepDetailFragmentViewState {
     class RecipeStepDetailViewState implements RecipeStepDetailFragmentViewState {
         final @Status int status;
         final @StringRes int loadingMessage;
-        //TODO: Maybe only pass a list of steps since that is what this fragment is all about
         @Nullable final Recipe recipe;
         final @StringRes int errorLabel;
         final @NonNull String errorArgument;

@@ -77,7 +77,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeDeta
 
         return adapterPosition;
     }
-//TODO: GEBLEVEN: Dit wordt 3x aangeroepen meestal door onScrolled
+
     private void setSelected(int adapterPos, boolean selected) {
         RecyclerView.ViewHolder vh = recyclerView.findViewHolderForAdapterPosition(adapterPos);
 
