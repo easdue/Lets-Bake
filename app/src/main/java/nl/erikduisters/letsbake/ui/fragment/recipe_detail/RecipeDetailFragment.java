@@ -9,10 +9,16 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import nl.erikduisters.letsbake.R;
@@ -20,6 +26,9 @@ import nl.erikduisters.letsbake.data.model.Status;
 import nl.erikduisters.letsbake.data.model.Step;
 import nl.erikduisters.letsbake.ui.BaseFragment;
 import nl.erikduisters.letsbake.ui.fragment.recipe_detail.RecipeDetailFragmentViewState.RecipeDetailViewState;
+import nl.erikduisters.letsbake.ui.widget.IngredientService;
+import nl.erikduisters.letsbake.util.MenuUtil;
+import nl.erikduisters.letsbake.util.MyMenuItem;
 
 /**
  * Created by Erik Duisters on 24-03-2018.
@@ -37,6 +46,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     private boolean isTablet;
     private boolean isLandscape;
     private int selectedStepId;
+    @NonNull private List<MyMenuItem> optionsMenu;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.progressBar) ProgressBar progressBar;
@@ -66,6 +76,10 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
+        optionsMenu = new ArrayList<>();
+
         isTablet = getResources().getBoolean(R.bool.isTablet);
         isLandscape = getResources().getBoolean(R.bool.isLandscape);
 
@@ -75,6 +89,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
         viewModel.getRecipeDetailViewState().observe(this, this::render);
         viewModel.getStartActivityViewState().observe(this, this::render);
+        viewModel.getUpdateWidgetViewState().observe(this, this::handle);
 
         Bundle args = getArguments();
 
@@ -139,6 +154,9 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
             return;
         }
 
+        optionsMenu = viewState.optionsMenu;
+        invalidateOptionsMenu();
+
         switch (viewState.status) {
             case Status.SUCCESS:
                 progressBar.setVisibility(View.INVISIBLE);
@@ -186,6 +204,16 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         viewModel.onActivityStarted();
     }
 
+    private void handle(@Nullable RecipeDetailFragmentViewState.UpdateWidgetViewState viewState) {
+        if (viewState == null) {
+            return;
+        }
+
+        IngredientService.startActionUpdateIngredients(getContext());
+
+        viewModel.widgetUpdated();
+    }
+
     @Override
     public void onStepClicked(Step step) {
         viewModel.onStepClicked(step);
@@ -199,5 +227,28 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
     public void setRecipeId(int recipeId) {
         viewModel.setRecipeId(recipeId);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.recipe_detail_fragment, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        MenuUtil.updateMenu(menu, optionsMenu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.showInWidget:
+                viewModel.onMenuItemClicked(item.getItemId());
+                return true;
+        }
+
+        return false;
     }
 }

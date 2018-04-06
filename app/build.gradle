@@ -6,7 +6,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         applicationId "nl.erikduisters.letsbake"
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -50,6 +50,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.1'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.4.2'
 }

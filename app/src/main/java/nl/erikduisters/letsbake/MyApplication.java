@@ -2,6 +2,7 @@ package nl.erikduisters.letsbake;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Service;
 import android.support.annotation.NonNull;
 
 import com.facebook.stetho.Stetho;
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
+import dagger.android.HasServiceInjector;
 import nl.erikduisters.letsbake.di.DaggerAppComponent;
 import timber.log.Timber;
 
@@ -17,9 +19,12 @@ import timber.log.Timber;
  * Created by Erik Duisters on 24-03-2018.
  */
 
-public class MyApplication extends Application implements HasActivityInjector {
+public class MyApplication extends Application
+        implements HasActivityInjector, HasServiceInjector {
     @Inject
-    DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
+    DispatchingAndroidInjector<Activity> dispatchingAndroidActivityInjector;
+    @Inject
+    DispatchingAndroidInjector<Service> dispatchingAndroidServiceInjector;
 
     @Override
     public void onCreate() {
@@ -46,6 +51,11 @@ public class MyApplication extends Application implements HasActivityInjector {
 
     @Override
     public DispatchingAndroidInjector<Activity> activityInjector() {
-        return dispatchingAndroidInjector;
+        return dispatchingAndroidActivityInjector;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Service> serviceInjector() {
+        return dispatchingAndroidServiceInjector;
     }
 }

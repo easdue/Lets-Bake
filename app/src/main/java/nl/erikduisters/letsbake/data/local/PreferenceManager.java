@@ -27,11 +27,11 @@ public class PreferenceManager {
         KEY_SELECTED_RECIPE_ID = ctx.getString(R.string.prefs_selected_recipe_id);
     }
 
-    public int getSelectedRecipeID() {
-        return sharedPreferences.getInt(KEY_SELECTED_RECIPE_ID, -1);
+    public int getSelectedWidgetRecipeID() {
+        return sharedPreferences.getInt(KEY_SELECTED_RECIPE_ID, RecipeRepository.INVALID_RECIPE_ID);
     }
 
-    public void setSelectedRecipeID(int recipeID) {
+    public void setSelectedWidgetRecipeID(int recipeID) {
         sharedPreferences
                 .edit()
                 .putInt(KEY_SELECTED_RECIPE_ID, recipeID)

@@ -105,7 +105,7 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
     }
 
     private void render(RecipeDetailViewState viewState) {
-        if (getSupportActionBar() != null) {
+        if (getSupportActionBar() != null && !viewState.recipeName.isEmpty()) {
             getSupportActionBar().setTitle(viewState.recipeName);
         }
     }

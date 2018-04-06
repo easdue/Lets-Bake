@@ -10,4 +10,8 @@
     <string name="ingredients">Ingredients</string>
     <string name="recipe_id_unknown">A recipe with the requested Id does not exist</string>
     <string name="recipe_id_invalid">The requested recipe Id is invalid</string>
+    <string name="no_recipe_selected">No Recipe Selected</string>
+    <string name="bullet">\u2022</string>
+    <string name="show_in_widget">Show in Widget</string>
+    <string name="ingredients_for">Ingredients for:</string>
 </resources>
