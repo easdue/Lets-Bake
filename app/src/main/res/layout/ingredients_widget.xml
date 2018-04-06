@@ -60,7 +60,8 @@
         android:layout_gravity="center"
         android:layout_margin="8dp"
         android:text="@string/no_recipe_selected"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@android:color/black"/>
 
     <FrameLayout
         android:layout_width="match_parent"
