@@ -5,8 +5,6 @@ import android.app.Application;
 import android.app.Service;
 import android.support.annotation.NonNull;
 
-import com.facebook.stetho.Stetho;
-
 import javax.inject.Inject;
 
 import dagger.android.DispatchingAndroidInjector;
@@ -39,8 +37,6 @@ public class MyApplication extends Application
         DaggerAppComponent.builder()
                 .create(this)
                 .inject(this);
-
-        Stetho.initializeWithDefaults(this);
     }
 
     private static class ReleaseTree extends Timber.Tree {

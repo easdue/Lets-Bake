@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,7 +52,6 @@ abstract class AppModule {
     @Singleton
     static OkHttpClient provideOkHttpClient() {
         return new OkHttpClient.Builder()
-                .addNetworkInterceptor(new StethoInterceptor())
                 .build();
     }
 
