@@ -75,7 +75,7 @@ public class RecipeRepository {
             return;
         }
 
-        cancelPendingRecipeListCall();
+        //cancelPendingRecipeListCall();
 
         if (networkMonitor.isNetworkConnected()) {
             requestLiveRecipes(callback);

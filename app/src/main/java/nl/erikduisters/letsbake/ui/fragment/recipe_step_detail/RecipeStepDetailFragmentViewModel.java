@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 
 import nl.erikduisters.letsbake.data.local.RecipeRepository;
 import nl.erikduisters.letsbake.data.model.Recipe;
+import nl.erikduisters.letsbake.data.model.Status;
 import nl.erikduisters.letsbake.ui.fragment.recipe_step_detail.RecipeStepDetailFragmentViewState.RecipeStepDetailViewState;
 
 /**
@@ -34,6 +35,12 @@ public class RecipeStepDetailFragmentViewModel extends ViewModel {
     LiveData<RecipeStepDetailViewState> getRecipeStepDetailViewState() { return recipeStepDetailViewState; }
 
     void setRecipeId(int recipeId) {
+        RecipeStepDetailViewState viewState = recipeStepDetailViewState.getValue();
+
+        if (viewState != null && viewState.status == Status.SUCCESS && viewState.recipe.getId() == recipeId) {
+            return;
+        }
+
         recipeRepository.getRecipe(recipeId, new RecipeRepository.Callback<Recipe>() {
             @Override
             public void onResponse(@NonNull Recipe response) {

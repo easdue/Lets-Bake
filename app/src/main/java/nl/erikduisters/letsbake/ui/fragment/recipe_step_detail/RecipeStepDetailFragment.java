@@ -126,14 +126,6 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
         viewModel.getRecipeStepDetailViewState().observe(this, this::render);
 
-        if (savedInstanceState != null) {
-            layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER_STATE);
-            currentStepId = savedInstanceState.getInt(KEY_RECIPE_STEP_ID);
-            currentPlaybackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSISTION);
-        } else {
-            currentPlaybackPosition = -1;
-        }
-
         Bundle args = getArguments();
 
         if (args != null && args.containsKey(KEY_RECIPE_ID) && args.containsKey(KEY_RECIPE_STEP_ID)) {
@@ -143,6 +135,14 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         } else {
             currentRecipeId = -1;
             currentStepId = -1;
+        }
+
+        if (savedInstanceState != null) {
+            layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER_STATE);
+            currentStepId = savedInstanceState.getInt(KEY_RECIPE_STEP_ID);
+            currentPlaybackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSISTION);
+        } else {
+            currentPlaybackPosition = -1;
         }
     }
 
