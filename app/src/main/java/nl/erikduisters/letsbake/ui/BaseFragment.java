@@ -2,6 +2,7 @@ package nl.erikduisters.letsbake.ui;
 
 import android.app.Activity;
 import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -21,7 +23,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
-import nl.erikduisters.letsbake.MyViewModelFactory;
 
 /**
  * Created by Erik Duisters on 04-12-2017.
@@ -31,7 +32,8 @@ public abstract class BaseFragment<VM extends ViewModel> extends Fragment {
     @Nullable private Unbinder unbinder;
 
     @Inject
-    MyViewModelFactory viewModelFactory;
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public ViewModelProvider.Factory viewModelFactory;
 
     protected VM viewModel;
 

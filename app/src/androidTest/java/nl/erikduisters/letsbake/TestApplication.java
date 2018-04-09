@@ -5,25 +5,19 @@ import android.app.Application;
 import android.app.Service;
 import android.support.annotation.NonNull;
 
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjector;
-import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import dagger.android.HasServiceInjector;
-import nl.erikduisters.letsbake.di.DaggerAppComponent;
 import timber.log.Timber;
 
 /**
- * Created by Erik Duisters on 24-03-2018.
+ * Created by Erik Duisters on 09-04-2018.
  */
-
-public class MyApplication extends Application
+public class TestApplication extends Application
         implements HasActivityInjector, HasServiceInjector {
-    @Inject
-    DispatchingAndroidInjector<Activity> dispatchingAndroidActivityInjector;
-    @Inject
-    DispatchingAndroidInjector<Service> dispatchingAndroidServiceInjector;
+
+    public static AndroidInjector<Activity> activityAndroidInjector;
+    public static AndroidInjector<Service> serviceAndroidInjector;
 
     @Override
     public void onCreate() {
@@ -32,12 +26,8 @@ public class MyApplication extends Application
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         } else {
-            Timber.plant(new ReleaseTree());
+            Timber.plant(new TestApplication.ReleaseTree());
         }
-
-        DaggerAppComponent.builder()
-                .create(this)
-                .inject(this);
     }
 
     private static class ReleaseTree extends Timber.Tree {
@@ -48,11 +38,11 @@ public class MyApplication extends Application
 
     @Override
     public AndroidInjector<Activity> activityInjector() {
-        return dispatchingAndroidActivityInjector;
+        return activityAndroidInjector;
     }
 
     @Override
     public AndroidInjector<Service> serviceInjector() {
-        return dispatchingAndroidServiceInjector;
+        return serviceAndroidInjector;
     }
 }

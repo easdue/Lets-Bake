@@ -1,10 +1,12 @@
 package nl.erikduisters.letsbake.di;
 
 import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProvider;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
+import nl.erikduisters.letsbake.MyViewModelFactory;
 import nl.erikduisters.letsbake.ui.activity.main_activity.MainActivityViewModel;
 import nl.erikduisters.letsbake.ui.activity.recipe_detail.RecipeDetailActivityViewModel;
 import nl.erikduisters.letsbake.ui.activity.recipe_step_detail.RecipeStepDetailActivityViewModel;
@@ -47,4 +49,7 @@ abstract class ViewModelBindingModule {
     @IntoMap
     @ViewModelKey(RecipeStepDetailFragmentViewModel.class)
     abstract ViewModel bindRecipeStepDetailFragmentViewModel(RecipeStepDetailFragmentViewModel viewModel);
+
+    @Binds
+    abstract ViewModelProvider.Factory bindViewModelFactory(MyViewModelFactory factory);
 }

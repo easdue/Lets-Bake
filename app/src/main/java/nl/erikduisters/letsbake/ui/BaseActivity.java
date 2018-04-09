@@ -1,10 +1,12 @@
 package nl.erikduisters.letsbake.ui;
 
 import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
@@ -13,19 +15,21 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
-import nl.erikduisters.letsbake.MyViewModelFactory;
 
 /**
  * Created by Erik Duisters on 04-12-2017.
  */
 public abstract class BaseActivity<VM extends ViewModel> extends AppCompatActivity implements HasSupportFragmentInjector {
     @Inject
-    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
 
     @Inject
-    MyViewModelFactory viewModelFactory;
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public ViewModelProvider.Factory viewModelFactory;
 
     protected VM viewModel;
 
@@ -51,7 +55,7 @@ public abstract class BaseActivity<VM extends ViewModel> extends AppCompatActivi
     protected abstract Class<VM> getViewModelClass();
 
     @Override
-    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+    public AndroidInjector<Fragment> supportFragmentInjector() {
         return dispatchingAndroidInjector;
     }
 

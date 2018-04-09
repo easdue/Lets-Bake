@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 
 import java.util.List;
 
@@ -41,8 +42,10 @@ public class RecipeListFragmentViewModel extends ViewModel {
         recipeRepository.getRecipes(new Callback());
     }
 
-    LiveData<RecipeListFragmentViewState.RecipeViewState> getRecipeViewState() { return recipeViewState; }
-    LiveData<RecipeListFragmentViewState.StartActivityViewState> getStartActivityViewState() { return startActivityViewState; }
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public LiveData<RecipeListFragmentViewState.RecipeViewState> getRecipeViewState() { return recipeViewState; }
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public LiveData<RecipeListFragmentViewState.StartActivityViewState> getStartActivityViewState() { return startActivityViewState; }
 
     void onRecipeClicked(Recipe recipe) {
         startActivityViewState.setValue(new RecipeListFragmentViewState.StartActivityViewState(recipe.getId(), RecipeDetailActivity.class));
@@ -61,7 +64,7 @@ public class RecipeListFragmentViewModel extends ViewModel {
 
         @Override
         public void onError(int error, @NonNull String errorArgument) {
-
+            recipeViewState.setValue(RecipeListFragmentViewState.RecipeViewState.getErrorViewState(error, errorArgument));
         }
     }
 }

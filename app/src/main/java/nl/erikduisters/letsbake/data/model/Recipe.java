@@ -14,6 +14,22 @@ public class Recipe {
     private int servings;
     private String image;
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setServings(int servings) {
+        this.servings = servings;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public int getId() {
         return id;
     }
