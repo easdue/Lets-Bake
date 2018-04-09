@@ -73,27 +73,13 @@ public class RecipeListFragmentTest {
     private final MutableLiveData<StartActivityViewState> startActivityViewState = new MutableLiveData<>();
 
     private DispatchingAndroidInjector<Fragment> createMainActivityDispatchingAndroidInjector() {
-        AndroidInjector<Fragment> injector = new AndroidInjector<Fragment>() {
-            @Override
-            public void inject(Fragment instance) {
-                ((RecipeListFragment) instance).viewModelFactory = ViewModelUtil.createFor(recipeListFragmentViewModel);
-            }
-        };
+        AndroidInjector<Fragment> injector = instance -> ((RecipeListFragment) instance).viewModelFactory =
+                ViewModelUtil.createFor(recipeListFragmentViewModel);
 
-        AndroidInjector.Factory<Fragment> factory = new AndroidInjector.Factory<Fragment>() {
-            @Override
-            public AndroidInjector<Fragment> create(Fragment instance) {
-                return injector;
-            }
-        };
+        AndroidInjector.Factory<Fragment> factory = instance -> injector;
 
         Map<Class<? extends Fragment>, Provider<AndroidInjector.Factory<? extends Fragment>>> map = new HashMap<>();
-        map.put(RecipeListFragment.class, new Provider<AndroidInjector.Factory<? extends Fragment>>() {
-            @Override
-            public AndroidInjector.Factory<? extends Fragment> get() {
-                return factory;
-            }
-        });
+        map.put(RecipeListFragment.class, () -> factory);
 
         return DispatchingAndroidInjector_Factory.newDispatchingAndroidInjector(map);
     }
@@ -107,14 +93,11 @@ public class RecipeListFragmentTest {
         when(recipeListFragmentViewModel.getRecipeViewState()).thenReturn(recipeViewState);
         when(recipeListFragmentViewModel.getStartActivityViewState()).thenReturn(startActivityViewState);
 
-        TestApplication.activityAndroidInjector = new AndroidInjector<Activity>() {
-            @Override
-            public void inject(Activity instance) {
-                MainActivity activity = (MainActivity) instance;
+        TestApplication.activityAndroidInjector = instance -> {
+            MainActivity activity = (MainActivity) instance;
 
-                activity.viewModelFactory = ViewModelUtil.createFor(mainActivityViewModel);
-                activity.dispatchingAndroidInjector = createMainActivityDispatchingAndroidInjector();
-            }
+            activity.viewModelFactory = ViewModelUtil.createFor(mainActivityViewModel);
+            activity.dispatchingAndroidInjector = createMainActivityDispatchingAndroidInjector();
         };
 
         activityRule.launchActivity(new Intent());

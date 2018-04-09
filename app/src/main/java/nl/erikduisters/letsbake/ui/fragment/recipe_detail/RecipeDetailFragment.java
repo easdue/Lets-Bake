@@ -41,7 +41,6 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
     private RecipeAdapter recipeAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    private Context context;
     private Parcelable layoutManagerState;
     private boolean isTablet;
     private boolean isLandscape;
@@ -68,8 +67,6 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        this.context = context;
     }
 
     @Override

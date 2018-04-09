@@ -36,6 +36,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="@android:color/black"
                 android:textStyle="bold"
@@ -48,7 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="5dp"
-            android:paddingLeft="20dp"/>
+            android:paddingLeft="20dp"
+            android:paddingStart="20dp"/>
     </LinearLayout>
 
     <TextView
@@ -57,7 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center"
+        android:layout_gravity="center_vertical|center_horizontal"
         android:layout_margin="8dp"
         android:text="@string/no_recipe_selected"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"

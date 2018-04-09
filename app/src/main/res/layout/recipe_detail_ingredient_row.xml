@@ -10,7 +10,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
         android:text="@string/bullet"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
 
@@ -19,7 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="5dp"
-        android:gravity="right"
+        android:layout_marginEnd="5dp"
+        android:gravity="end"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         tools:text="500"/>
 
@@ -28,7 +31,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="5dp"
-        android:gravity="left"
+        android:layout_marginEnd="5dp"
+        android:gravity="start"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         tools:text="TBLSP"/>
 

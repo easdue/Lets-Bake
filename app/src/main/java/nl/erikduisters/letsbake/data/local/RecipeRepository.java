@@ -42,7 +42,6 @@ public class RecipeRepository {
     public static final int INVALID_RECIPE_STEP_ID = -1;
 
     private final RecipeService recipeService;
-    private final PreferenceManager preferenceManager;
     private final NetworkMonitor networkMonitor;
     private final BackgroundJobHandler backgroundJobHandler;
     private @Nullable Call<List<Recipe>> recipeListCall;
@@ -54,12 +53,11 @@ public class RecipeRepository {
     private @Nullable List<Recipe> recipeList;
 
     @Inject
-    RecipeRepository(RecipeService recipeService, PreferenceManager preferenceManager,
+    RecipeRepository(RecipeService recipeService,
                      NetworkMonitor networkMonitor, BackgroundJobHandler backgroundJobHandler,
                      @ApplicationContext Context context, Gson gson) {
 
         this.recipeService = recipeService;
-        this.preferenceManager = preferenceManager;
         this.networkMonitor = networkMonitor;
         this.backgroundJobHandler = backgroundJobHandler;
         this.cacheFile = new File(context.getCacheDir(), RECIPES_CACHE_FILE);

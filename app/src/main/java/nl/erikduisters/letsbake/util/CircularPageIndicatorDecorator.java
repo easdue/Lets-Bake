@@ -44,8 +44,8 @@ public class CircularPageIndicatorDecorator extends RecyclerView.ItemDecoration 
     @IntDef({Position.TOP, Position.BOTTOM})
     @Retention(RetentionPolicy.RUNTIME)
     public @interface Position {
-        final int TOP = 0;
-        final int BOTTOM = 1;
+        int TOP = 0;
+        int BOTTOM = 1;
     }
 
     private final @Position int position;

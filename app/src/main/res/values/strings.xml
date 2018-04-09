@@ -14,4 +14,6 @@
     <string name="bullet">\u2022</string>
     <string name="show_in_widget">Show in Widget</string>
     <string name="ingredients_for">Ingredients for:</string>
+    <string name="recipe_image">Recipe Image</string>
+    <string name="recipe_video_thumbnail">Recipe video thumbnail</string>
 </resources>

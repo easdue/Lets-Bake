@@ -24,15 +24,12 @@ import timber.log.Timber;
 
 @Singleton
 public class RecipeListFragmentViewModel extends ViewModel {
-    private final RecipeRepository recipeRepository;
     private final MutableLiveData<RecipeListFragmentViewState.RecipeViewState> recipeViewState;
     private final MutableLiveData<RecipeListFragmentViewState.StartActivityViewState> startActivityViewState;
 
     @Inject
     public RecipeListFragmentViewModel(RecipeRepository recipeRepository, PreferenceManager preferenceManager) {
         Timber.d("New RecipeListFragmentViewModel created");
-
-        this.recipeRepository = recipeRepository;
 
         recipeViewState = new MutableLiveData<>();
         recipeViewState.setValue(RecipeListFragmentViewState.RecipeViewState.getLoadingViewState());
