@@ -363,11 +363,11 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
                     simpleExoPlayer.seekTo(currentPlaybackPosition);
                     simpleExoPlayer.setPlayWhenReady(playbackWhenReady);
                     currentPlaybackPosition = -1;
+                } else {
+                    simpleExoPlayer.setPlayWhenReady(true);
                 }
 
                 stepAdapter.setSimpleExoPlayer(simpleExoPlayer, currentStepId);
-
-                simpleExoPlayer.setPlayWhenReady(true);
             }
         }
     }
