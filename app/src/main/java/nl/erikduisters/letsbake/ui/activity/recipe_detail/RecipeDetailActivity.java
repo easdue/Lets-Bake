@@ -33,7 +33,6 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
     @BindView(R.id.toolbar) Toolbar toolbar;
 
     private boolean isTablet;
-    private boolean isLandscape;
     private RecipeDetailFragment detailFragment;
     private RecipeStepDetailFragment stepDetailFragment;
 
@@ -42,7 +41,6 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
         super.onCreate(savedInstanceState);
 
         isTablet = getResources().getBoolean(R.bool.isTablet);
-        isLandscape = getResources().getBoolean(R.bool.isLandscape);
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
