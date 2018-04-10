@@ -51,7 +51,8 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     public static final String KEY_RECIPE_ID = "RecipeId";
     public static final String KEY_RECIPE_STEP_ID = "RecipeStepId";
     public static final String KEY_LAYOUT_MANAGER_STATE = "LayoutManagerState";
-    public static final String KEY_PLAYBACK_POSISTION = "PlayBackPosition";
+    public static final String KEY_PLAYBACK_POSITION = "PlayBackPosition";
+    public static final String KEY_PLAYBACK_WHEN_READY = "PlayBackWhenReady";
 
     private StepAdapter stepAdapter;
     private LinearLayoutManager layoutManager;
@@ -59,6 +60,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     private int currentRecipeId;
     private int currentStepId;
     private long currentPlaybackPosition;
+    private boolean playbackWhenReady;
     private Context context;
     private SimpleExoPlayer simpleExoPlayer;
     private DataSource.Factory dataSourceFactory;
@@ -140,7 +142,8 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
         if (savedInstanceState != null) {
             layoutManagerState = savedInstanceState.getParcelable(KEY_LAYOUT_MANAGER_STATE);
             currentStepId = savedInstanceState.getInt(KEY_RECIPE_STEP_ID);
-            currentPlaybackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSISTION);
+            currentPlaybackPosition = savedInstanceState.getLong(KEY_PLAYBACK_POSITION);
+            playbackWhenReady = savedInstanceState.getBoolean(KEY_PLAYBACK_WHEN_READY);
         } else {
             currentPlaybackPosition = -1;
         }
@@ -223,6 +226,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
     private void releasePlayer() {
         if (simpleExoPlayer != null) {
             currentPlaybackPosition = simpleExoPlayer.getCurrentPosition();
+            playbackWhenReady = simpleExoPlayer.getPlayWhenReady();
             simpleExoPlayer.release();
             simpleExoPlayer = null;
         }
@@ -247,10 +251,11 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
         if (simpleExoPlayer != null) {
             currentPlaybackPosition = simpleExoPlayer.getCurrentPosition();
+            playbackWhenReady = simpleExoPlayer.getPlayWhenReady();
         }
 
-        outState.putLong(KEY_PLAYBACK_POSISTION, currentPlaybackPosition);
-
+        outState.putLong(KEY_PLAYBACK_POSITION, currentPlaybackPosition);
+        outState.putBoolean(KEY_PLAYBACK_WHEN_READY, playbackWhenReady);
     }
 
     void render(@Nullable RecipeStepDetailViewState viewState) {
@@ -356,6 +361,7 @@ public class RecipeStepDetailFragment extends BaseFragment<RecipeStepDetailFragm
 
                 if (currentPlaybackPosition != -1) {
                     simpleExoPlayer.seekTo(currentPlaybackPosition);
+                    simpleExoPlayer.setPlayWhenReady(playbackWhenReady);
                     currentPlaybackPosition = -1;
                 }
 

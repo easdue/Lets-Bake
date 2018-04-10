@@ -2,6 +2,7 @@ package nl.erikduisters.letsbake.ui.fragment.recipe_step_detail;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,8 +102,8 @@ public class StepAdapter extends RecyclerView.Adapter<StepAdapter.ViewHolder> {
         void bind(Step step) {
             Timber.e("bind stepId=%d", step.getId());
 
-            boolean videoAvailable = !step.getVideoURL().isEmpty() && step.getVideoURL().endsWith(".mp4");
-            boolean thumbnailAvailable = !step.getThumbnailURL().isEmpty() && isImageUrl(step.getThumbnailURL());
+            boolean videoAvailable = !TextUtils.isEmpty(step.getVideoURL()) && step.getVideoURL().endsWith(".mp4");
+            boolean thumbnailAvailable = !TextUtils.isEmpty(step.getThumbnailURL()) && isImageUrl(step.getThumbnailURL());
 
             this.step = step;
 

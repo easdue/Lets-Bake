@@ -43,7 +43,6 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
     private RecyclerView.LayoutManager layoutManager;
     private Parcelable layoutManagerState;
     private boolean isTablet;
-    private boolean isLandscape;
     private int selectedStepId;
     @NonNull private List<MyMenuItem> optionsMenu;
 
@@ -78,11 +77,10 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
         optionsMenu = new ArrayList<>();
 
         isTablet = getResources().getBoolean(R.bool.isTablet);
-        isLandscape = getResources().getBoolean(R.bool.isLandscape);
 
         recipeAdapter = new RecipeAdapter();
         recipeAdapter.setOnStepClickedListener(this);
-        recipeAdapter.setSelectionEnabled(isTablet && isLandscape);
+        recipeAdapter.setSelectionEnabled(isTablet);
 
         viewModel.getRecipeDetailViewState().observe(this, this::render);
         viewModel.getStartActivityViewState().observe(this, this::render);
@@ -166,12 +164,14 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
                     selectedStepId = step.getId();
 
-                    if (isTablet && isLandscape) {
+                    if (isTablet) {
                         viewModel.onStepClicked(step);
                     }
                 }
 
-                recipeAdapter.setSelectedStepId(selectedStepId);
+                if (isTablet) {
+                    recipeAdapter.setSelectedStepId(selectedStepId);
+                }
 
                 if (layoutManagerState != null) {
                     layoutManager.onRestoreInstanceState(layoutManagerState);
@@ -217,7 +217,7 @@ public class RecipeDetailFragment extends BaseFragment<RecipeDetailFragmentViewM
 
         selectedStepId = step.getId();
 
-        if (isLandscape && isTablet) {
+        if (isTablet) {
             recipeAdapter.setSelectedStepId(step.getId());
         }
     }

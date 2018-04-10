@@ -53,7 +53,7 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        if (isTablet && isLandscape) {
+        if (isTablet) {
             detailFragment = (RecipeDetailFragment) fragmentManager.findFragmentById(R.id.recipeListFragment);
             stepDetailFragment = (RecipeStepDetailFragment) fragmentManager.findFragmentById(R.id.recipeStepDetailFragment);
 
@@ -123,7 +123,7 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
 
     @Override
     public void startActivityFromFragment(Fragment fragment, Intent intent, int requestCode, @Nullable Bundle options) {
-        if (isTablet && isLandscape) {
+        if (isTablet) {
             stepDetailFragment.setStepId(intent.getIntExtra(RecipeStepDetailActivity.KEY_STEP_ID, RecipeRepository.INVALID_RECIPE_STEP_ID));
         } else {
             super.startActivityFromFragment(fragment, intent, requestCode, options);
@@ -132,7 +132,7 @@ public class RecipeDetailActivity extends BaseActivity<RecipeDetailActivityViewM
 
     @Override
     public void onSelectedStepChanged(Step step) {
-        if (isTablet && isLandscape) {
+        if (isTablet) {
             detailFragment.onStepClicked(step);
         }
     }
